@@ -1,0 +1,67 @@
+services:
+  # 1. PostgreSQL Database Servisi
+  postgres:
+    image: postgres:15-alpine 
+    container_name: chat_core_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data 
+    networks:
+      - chat_core_network
+
+  # 2. Redis Cache Servisi
+  redis:
+    image: redis:6-alpine
+    container_name: chat_core_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data 
+    networks:
+      - chat_core_network
+
+  # 3. Chat Core API Servisi (Backend - Node.js)
+  api:
+    build: 
+      context: ./api # API Dockerfile'ını api klasöründe arayacak
+    container_name: chat_core_api
+    restart: always
+    ports:
+      - "8000:8000" # API Portu
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - ./.env
+    networks:
+      - chat_core_network
+
+  # 4. React Frontend Servisi (Nginx ile Build Edilmiş Kodu Sunacak)
+  frontend:
+    image: nginx:alpine
+    container_name: chat_core_frontend
+    restart: always
+    ports:
+      - "3000:80" # Frontend 3000 portunda yayınlanacak
+    volumes:
+      # BU KLASÖR GELİŞTİRİCİ TARAFINDAN OLUŞTURULACAK
+      - ./frontend/build:/usr/share/nginx/html 
+    networks:
+      - chat_core_network
+
+# 5. Volumes Tanımı
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# 6. Network Tanımı
+networks:
+  chat_core_network:
+    driver: bridge
