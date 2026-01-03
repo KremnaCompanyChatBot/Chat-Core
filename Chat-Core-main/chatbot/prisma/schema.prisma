@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String    
+  email     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime? 
+  messages  Message[]
+  rooms     RoomMember[]
+}
+
+enum MessageStatus {
+  stream
+  done
+  error
+}
+
+
+model Room {
+  id        Int          @id @default(autoincrement())
+  name      String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?  @default(now())
+  messages  Message[]
+  members   RoomMember[]
+}
+
+
+
+
+model Message {
+  id        Int       @id @default(autoincrement())
+  content   String
+  oldContent String?
+  userId    Int
+  roomId    Int
+  status    MessageStatus  @default(stream) // varsayılan olarak "stream"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime  @default(now()) 
+  deletedAt DateTime?  
+  user      User      @relation(fields: [userId], references: [id])
+  room      Room      @relation(fields: [roomId], references: [id])
+}
+
+
+
+
+model RoomMember {
+  id      Int  @id @default(autoincrement())
+  userId  Int
+  roomId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?  
+  user   User @relation(fields: [userId], references: [id])
+  room   Room @relation(fields: [roomId], references: [id])
+
+  @@unique([userId, roomId]) // aynı kullanıcı aynı odaya iki kez giremesin
+}

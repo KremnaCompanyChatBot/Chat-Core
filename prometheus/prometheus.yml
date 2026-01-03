@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s # Metrikleri 15 saniyede bir çek
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090'] # Prometheus'un kendi metriklerini izle
+
+  - job_name: 'chat-core-api'
+    metrics_path: '/metrics' # Backend API'sinin metrikleri sunacağı varsayılan yol
+    static_configs:
+      - targets: ['api:8000'] # DİKKAT: 'api' servis adını ve varsayılan metrik portunu kullan

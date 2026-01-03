@@ -1,0 +1,16 @@
+# Ortam Değişkenleri (Hassas Bilgiler)
+.env
+
+# Node.js/npm tarafından oluşturulan bağımlılık klasörü
+node_modules/
+api/node_modules/
+
+# React Build Klasörü
+frontend/build/
+
+# Mac OS tarafından oluşturulan sistem dosyaları
+.DS_Store
+
+# Docker Image Cache/Logs
+*.log
+.tmp/
